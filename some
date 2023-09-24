@@ -1,0 +1,32 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+	echo "some: quick and dirty srcatch pads for most popular langauges."
+	echo ""
+	echo "USAGE: some <LANG>"
+	echo ""
+	echo "Supported languages:"
+	echo "  rust"
+	echo "  javascript (node/bun/deno)"
+	echo "  typescript (node/bun/deno)"
+	echo "  haskell"
+	echo "  julia"
+	echo "  python"
+	echo "  ocaml"
+	echo "  go"
+	echo "  java"
+	echo "  clojure"
+	echo "  scala"
+	echo "  and more"
+	exit 0
+fi
+
+case "$1" in
+"wow")
+	echo "yay"
+	;;
+"yay")
+	echo "wow"
+	;;
+*) echo "NOOOO" ;;
+esac
