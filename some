@@ -1,14 +1,122 @@
 #!/bin/sh
+#
+set -e
 
+# EMBEDDED FILES
+RUST_MAKEFILE="OUTDIR = out
+all: build
+
+\$(OUTDIR):
+	mkdir -p \$@
+
+build: \$(OUTDIR)
+	cargo build
+	# TODO:          \/ find a away to dymanically get the name 
+	cp target/debug/rust ./out/
+
+test:
+	cargo test
+
+run:
+	cargo run"
+
+NIX_FLAKE_TEMPLATE="{
+  description = \"some {{name}}\";
+
+  inputs = {
+    flake-utils.url = \"github:numtide/flake-utils\";
+    nixpkgs.url = \"github:nixos/nixpkgs/nixos-unstable\";
+  };
+
+  outputs = { self, nixpkgs, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+        shellInputs = [{{inputs}} ];
+      in {
+        devShells = {
+          default = pkgs.mkShell {
+            buildInputs = shellInputs;
+            shellHook = ''
+              exec \$SHELL 
+            '';
+          };
+          editor = pkgs.mkShell {
+            buildInputs = shellInputs;
+            shellHook = ''
+              exec \$EDITOR {{pathtomain}}
+            '';
+          };
+        };
+      });
+}"
+
+# USER INTERACTION UTILITIES
+confirm() {
+	printf "%s: [Y/n] " "$1"
+	read -r answer
+	if [ "$answer" = "no" ] || [ "$answer" = "NO" ] || [ "$answer" = "No" ] || [ "$answer" = "nO" ] || [ "$answer" = "n" ] || [ "$answer" = "N" ]; then
+		return 1
+	fi
+	return 0
+}
+
+# FS INTERACTION UTILITIES
+direxists() {
+	if [ -d "$1" ]; then
+		return 0
+	fi
+	return 1
+}
+
+is_some() {
+	if ! direxists "$1/.git"; then
+		return 1
+	fi
+
+	if [ ! -f "$1/.is_some" ]; then
+		return 1
+	fi
+
+	if [ "$(cat "$1/.is_some")" = "This file exists to identify that the fact that this directory is part of the 'some' project." ]; then
+		return 0
+	fi
+	return 1
+}
+
+make_dir_some() {
+	echo "This file exists to identify that the fact that this directory is part of the 'some' project." >.is_some
+	echo ".is_some" >>.gitignore
+}
+
+# NIX INTERACTION UTILITIES
+create_flake_inputs() {
+	shift
+	string=""
+	for i in "$@"; do
+		string="$string pkgs.$i"
+	done
+	echo "$string"
+}
+
+generate_nix_flake() {
+	pathtomain="$1"
+	shift
+	echo "$NIX_FLAKE_TEMPLATE" | sed "s/{{name}}/$1/" | sed "s@{{pathtomain}}@$pathtomain@" | sed "s/{{inputs}}/$(create_flake_inputs "$@")/"
+}
+
+## MAIN ##
+
+# If you call the program without any arguments then print the help message and exit.
 if [ -z "$1" ]; then
-	echo "some: quick and dirty srcatch pads for most popular langauges."
+	echo "some: Quick and dirty scratch pads for most, popular, programming languages."
 	echo ""
 	echo "USAGE: some <LANG>"
 	echo ""
 	echo "Supported languages:"
 	echo "  rust"
-	echo "  javascript (node/bun/deno)"
-	echo "  typescript (node/bun/deno)"
+	echo "  javascript (node/bun/deno, default: node)"
+	echo "  typescript (node/bun/deno, default: node)"
 	echo "  haskell"
 	echo "  julia"
 	echo "  python"
@@ -21,12 +129,84 @@ if [ -z "$1" ]; then
 	exit 0
 fi
 
+# Save temporary code to a permanent location
+if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
+	if [ -z "$2" ]; then
+		echo "Please specify which language you want to save."
+		exit 1
+	fi
+
+	if ! is_some "/tmp/$2"; then
+		echo "You don't have a some '$2' code."
+		exit 1
+	fi
+
+	while true; do
+		printf "Where do you want to save documents to?: "
+		read -r path
+		path="$(eval "echo $path")"
+		parent="$(dirname "$path")"
+
+		if [ -f "$path" ]; then
+			echo "There already exists a file at path: '$path'"
+			if confirm "Do you whish for this file to be overriden?"; then
+				rm "$path"
+				echo "Overriden '$path'..."
+				break
+			fi
+			continue
+		fi
+
+		if [ -d "$path" ] || [ -d "$parent" ]; then
+			break
+		fi
+
+		echo "Path: The path '$parent' does not exist!"
+		if confirm "Is it ok if it created?"; then
+			mkdir -p "$parent"
+			echo "Created '$parent'..."
+			break
+		fi
+	done
+
+	cp -R "/tmp/$2" "/tmp/$2-cp"
+	rm -rf "/tmp/$2-cp/.git" 2>/dev/null
+	rm -rf "/tmp/$2-cp/.is_some" 2>/dev/null
+	rm -rf "/tmp/$2-cp/flake.nix" 2>/dev/null
+	rm -rf "/tmp/$2-cp/.gitignore" 2>/dev/null
+	rm -rf "/tmp/$2-cp/flake.lock" 2>/dev/null
+	rm -rf "/tmp/$2-cp/Makefile" 2>/dev/null
+	mv "/tmp/$2-cp" "$path"
+	exit 0
+fi
+
+integration() {
+	lang="$2"
+
+	if [ -e "/tmp/$lang" ] && ! is_some "/tmp/$lang"; then
+		if ! confirm "'some' is trying to overwrite the path '/tmp/$lang', is that okay?"; then
+			exit 1
+		fi
+	fi
+
+	rm -rf "/tmp/$lang" 2>/dev/null
+	mkdir "/tmp/$lang/"
+	cd "/tmp/$lang"
+	make_dir_some
+	generate_nix_flake "$@" >flake.nix
+}
+
 case "$1" in
-"wow")
-	echo "yay"
+"rust")
+	integration "src/main.rs" "$@" "cargo" "rustfmt" "rustc"
+	nix run nixpkgs#cargo -- init
+	echo "$RUST_MAKEFILE" >Makefile
 	;;
-"yay")
-	echo "wow"
-	;;
-*) echo "NOOOO" ;;
+*) echo "'$1' is not implemented yet!" && exit 1 ;;
 esac
+
+if ! direxists .git; then git init .; fi
+git add .
+git commit -m "initial commit"
+
+exec nix develop .#editor
