@@ -9,10 +9,12 @@ release:
 	@echo "This project does not have a build step. It only has a install and uninstall step"
 
 install:
-	sed 's/PREFIX="."/PREFIX="$(PREFIX)"' > $PREFIX/bin/some
-	[ -d $PREFIX/share/some/ ] && rm -rf $PREFIX/share/some
-	cp -R languages $PREFIX/share/some/
+	sed 's@PREFIX=.@PREFIX=$(PREFIX)/share/some@' ./some > $(PREFIX)/bin/some
+	chmod +x $(PREFIX)/bin/some
+	if [ -d $(PREFIX)/share/some/ ]; then rm -rf $(PREFIX)/share/some; fi
+	mkdir -p $(PREFIX)/share/some
+	cp -R languages $(PREFIX)/share/some/
 
 uninstall:
-	[ -f $PREFIX/bin/some ] && rm $PREFIX/bin/some
-	[ -d $PREFIX/share/some ] && rm $PREFIX/share/some/
+	[ -f $(PREFIX)/bin/some ] && rm $(PREFIX)/bin/some
+	[ -d $(PREFIX)/share/some ] && rm $(PREFIX)/share/some/
