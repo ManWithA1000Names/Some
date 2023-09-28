@@ -1,6 +1,6 @@
 all: build
 
-build: $(OUTDIR)
+build:
 	cargo build
 
 test:

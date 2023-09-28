@@ -1,12 +1,13 @@
 #!/bin/sh
 
 PREFIX=.
+PREFIX="$(realpath "$PREFIX")"
+
+SOME_IDENTIFIEER_TEXT="This file exists to identify that the fact that this directory is part of the 'some' project."
 
 set -e
 
-NIX_FLAKE_TEMPLATE="{
-  description = \"some {{name}}\";
-
+NIX_FLAKE_TEMPLATE="{ description = \"some {{name}}\";
   inputs = {
     flake-utils.url = \"github:numtide/flake-utils\";
     nixpkgs.url = \"github:nixos/nixpkgs/nixos-unstable\";
@@ -39,45 +40,30 @@ NIX_FLAKE_TEMPLATE="{
 confirm() {
 	printf "%s: [Y/n] " "$1"
 	read -r answer
-	if [ "$answer" = "no" ] || [ "$answer" = "NO" ] || [ "$answer" = "No" ] || [ "$answer" = "nO" ] || [ "$answer" = "n" ] || [ "$answer" = "N" ]; then
-		return 1
-	fi
-	return 0
+	! echo "$answer" | grep -qP "[nN][oO]?"
 }
 
 # FS INTERACTION UTILITIES
 is_some() {
-	if [ ! -d "$1/.git" ]; then
-		return 1
-	fi
-
-	if [ ! -f "$1/.is_some" ]; then
-		return 1
-	fi
-
-	if [ "$(cat "$1/.is_some")" = "This file exists to identify that the fact that this directory is part of the 'some' project." ]; then
-		return 0
-	fi
-	return 1
+	[ -d "$1/.git" ] && [ -f "$1/.is_some" ] && [ "$(cat "$1/.is_some")" = "$SOME_IDENTIFIEER_TEXT" ]
 }
 
 # NIX INTERACTION UTILITIES
 create_flake_inputs() {
 	lang="$1"
 	shift
-	string=""
 	for pkg in "$@"; do
 		string="$string pkgs.$pkg"
 	done
-	for pkg in $(awk -F'"' '/depencies/ {print $2}' "$PREFIX/languages/$lang/config.toml"); do
+	while read -r pkg; do
 		string="$string pkgs.$pkg"
-	done
+	done <"$PREFIX/languages/$lang/dependencies.txt"
 	echo "$string "
 }
 
 ## MAIN ##
 
-# If you call the program without any arguments then print the help message and exit.
+# If you call the program without any arguments then print the help message and xit.
 if [ -z "$1" ]; then
 	echo "some: Quick and dirty scratch pads for popular programming languages."
 	echo ""
@@ -170,11 +156,11 @@ mkdir "/tmp/$1/"
 # Enter the newly created directory
 cd "/tmp/$1"
 # Make this directory identifiable as a 'some' directory
-echo "This file exists to identify that the fact that this directory is part of the 'some' project." >.is_some
+echo "$SOME_IDENTIFIEER_TEXT" >.is_some
 # Generate the nix flake
-echo "$NIX_FLAKE_TEMPLATE" | sed "s/{{name}}/$1/" | sed "s@{{pathtomain}}@$(awk -F'"' '/main-file/ {print $2}' "$PREFIX/languages/$1/config.toml")@" | sed "s/{{inputs}}/$(create_flake_inputs "$@")/" >flake.nix
+echo "$NIX_FLAKE_TEMPLATE" | sed "s/{{name}}/$1/" | sed "s@{{pathtomain}}@$(cat "$PREFIX/languages/$1/main-file.txt")@" | sed "s/{{inputs}}/$(create_flake_inputs "$@")/" >flake.nix
 # Language specific project initialization command
-eval "$(awk -F'"' '/init-command/ {print $2}' "$PREFIX/languages/$1/config.toml")"
+sh "$PREFIX/languages/$1/init.sh"
 # Add the special .is_some file to the git ignored files
 echo ".is_some" >>.gitignore
 # Copy the Makefile for easy use of rapidly changing languages

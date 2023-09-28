@@ -1,0 +1,5 @@
+init-command = """
+  nix run nixpkgs#julia -- -e "using Pkg; Pkg.generate(\"Main\")"
+"""
+dependencies = "julia"
+main-file = "src/Main.jl"

@@ -10,7 +10,7 @@ release:
 
 install:
 	mkdir -p $(PREFIX)/bin
-	sed 's@PREFIX=.@PREFIX=$(PREFIX)/share/some@' ./some > $(PREFIX)/bin/some
+	sed 's@PREFIX=\.@PREFIX=$(PREFIX)/share/some@' ./some > $(PREFIX)/bin/some
 	chmod +x $(PREFIX)/bin/some
 	if [ -d $(PREFIX)/share/some/ ]; then rm -rf $(PREFIX)/share/some; fi
 	mkdir -p $(PREFIX)/share/some

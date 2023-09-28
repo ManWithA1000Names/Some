@@ -1,3 +1,0 @@
-init-command = "nix run nixpkgs#cargo -- init"
-dependencies = "cargo rustfmt rustc"
-main-file = "src/main.rs"
