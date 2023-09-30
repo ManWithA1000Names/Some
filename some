@@ -80,6 +80,27 @@ if [ -z "$1" ]; then
 	exit 0
 fi
 
+if [ "$1" = "--clean" ] || [ "$1" = "-c" ]; then
+	if [ -n "$2" ]; then
+		if [ ! -d "/tmp/some-$2" ]; then
+			echo "you don't have any '$2' code."
+			exit 1
+		fi
+		rm -rf /tmp/"some-$2"
+		echo "Deleted /tmp/some-$2"
+		exit 0
+	fi
+	for l in "$PREFIX"/languages/*; do
+		lang="$(basename "$l")"
+		if [ -d "/tmp/some-$lang" ]; then
+			rm -rf /tmp/"some-$lang"
+			echo "Deleted /tmp/some-$lang"
+		fi
+	done
+	echo "All done!"
+	exit 0
+fi
+
 # Save temporary code to a permanent location
 if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
 	if [ -z "$2" ]; then
@@ -87,7 +108,7 @@ if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
 		exit 1
 	fi
 
-	if ! is_some "/tmp/$2"; then
+	if ! is_some "/tmp/some-$2"; then
 		echo "You don't have a some '$2' code."
 		exit 1
 	fi
@@ -120,17 +141,17 @@ if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
 		fi
 	done
 
-	cp -R "/tmp/$2" "/tmp/$2-cp"
-	rm -rf "/tmp/$2-cp/.git" 2>/dev/null
-	rm -rf "/tmp/$2-cp/.is_some" 2>/dev/null
-	rm -rf "/tmp/$2-cp/flake.nix" 2>/dev/null
-	rm -rf "/tmp/$2-cp/.gitignore" 2>/dev/null
-	rm -rf "/tmp/$2-cp/flake.lock" 2>/dev/null
-	rm -rf "/tmp/$2-cp/Makefile" 2>/dev/null
+	cp -R "/tmp/some-$2" "/tmp/some-$2-cp"
+	rm -rf "/tmp/some-$2-cp/.git" 2>/dev/null
+	rm -rf "/tmp/some-$2-cp/.is_some" 2>/dev/null
+	rm -rf "/tmp/some-$2-cp/flake.nix" 2>/dev/null
+	rm -rf "/tmp/some-$2-cp/.gitignore" 2>/dev/null
+	rm -rf "/tmp/some-$2-cp/flake.lock" 2>/dev/null
+	rm -rf "/tmp/some-$2-cp/Makefile" 2>/dev/null
 	if [ -d "$path" ]; then
-		mv "/tmp/$2-cp" "$path/$(basename "$path")"
+		mv "/tmp/some-$2-cp" "$path/$(basename "$path")"
 	else
-		mv "/tmp/$2-cp" "$path"
+		mv "/tmp/some-$2-cp" "$path"
 	fi
 	exit 0
 fi
@@ -143,18 +164,18 @@ if [ ! -d "$PREFIX/languages/$1" ]; then
 fi
 
 # Be careful not to delete random user data
-if [ -e "/tmp/$1" ] && ! is_some "/tmp/$1"; then
-	if ! confirm "'some' is trying to overwrite the path '/tmp/$1', is that okay?"; then
+if [ -e "/tmp/some-$1" ] && ! is_some "/tmp/some-$1"; then
+	if ! confirm "'some' is trying to overwrite the path '/tmp/some-$1', is that okay?"; then
 		exit 1
 	fi
 fi
 
 # Delete maybe existing directory
-rm -rf "/tmp/$1" 2>/dev/null
+rm -rf "/tmp/some-$1" 2>/dev/null
 # Create fresh empty directory
-mkdir "/tmp/$1/"
+mkdir "/tmp/some-$1/"
 # Enter the newly created directory
-cd "/tmp/$1"
+cd "/tmp/some-$1"
 # Make this directory identifiable as a 'some' directory
 echo "$SOME_IDENTIFIEER_TEXT" >.is_some
 # Generate the nix flake
