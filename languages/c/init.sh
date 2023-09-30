@@ -1,6 +1,6 @@
 #!/bin/sh
 mkdir src
-printf '#include <stio.h>
+printf '#include <stdio.h>
 
 int main(void) {
   printf("Hello, World!\\n");
