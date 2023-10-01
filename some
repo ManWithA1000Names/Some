@@ -55,9 +55,11 @@ create_flake_inputs() {
 	for pkg in "$@"; do
 		string="$string pkgs.$pkg"
 	done
-	while read -r pkg; do
-		string="$string pkgs.$pkg"
-	done <"$PREFIX/languages/$lang/dependencies.txt"
+	if [ -f "$PREFIX/languages/$lang/dependencies.txt" ]; then
+		while read -r pkg; do
+			string="$string pkgs.$pkg"
+		done <"$PREFIX/languages/$lang/dependencies.txt"
+	fi
 	echo "$string "
 }
 
