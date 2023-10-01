@@ -1,2 +1,2 @@
 #!/bin/sh
-nix run nixpkgs#cargo -- init
+cargo init

@@ -7,6 +7,6 @@ test:
 	@echo "julia does not have a built-in test suite"
 
 run:
-	julia --project=./Julia Julia/src/Julia.jl
+	julia --project=. src/Julia.jl
 
 

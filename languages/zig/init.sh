@@ -1,2 +1,2 @@
 #!/bin/sh
-nix run nixpkgs#zig -- init-exe
+zig init-exe
