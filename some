@@ -73,7 +73,8 @@ if [ -z "$1" ]; then
 	echo "    some <LANG>"
 	echo ""
 	echo "FLAGS:"
-	echo "    --save | -s <LANG>    Save the code for <LANG> to a permanent location"
+	echo "    --save  | -s <LANG>      Save the code for <LANG> to a permanent location"
+	echo "    --clean | -c [<LANG>]    Delete the file generate by the use the some command. Could be all file or just for a specific language if provided."
 	echo ""
 	echo "Supported languages:"
 	for l in "$PREFIX"/languages/*; do
