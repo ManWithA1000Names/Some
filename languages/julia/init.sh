@@ -1,5 +1,5 @@
 #!/bin/sh
 julia -e 'using Pkg; Pkg.generate("Julia")'
-cp Julia/* .
-cp Julia/.* .
+cp -r Julia/* .
+cp -r Julia/.* .
 rm -rf Julia
