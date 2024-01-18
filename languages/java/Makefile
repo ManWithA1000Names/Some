@@ -1,5 +1,5 @@
 JAVA_FILES=$(wildcard *.java)
-CLASS_FILES=$(patsubt %.java, %.class, $(JAVA_FILES))
+CLASS_FILES=$(patsubst %.java, %.class, $(JAVA_FILES))
 
 all: build
 
