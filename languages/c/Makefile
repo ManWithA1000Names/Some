@@ -28,9 +28,12 @@ $(OBJ_DIR):
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-build: $(OBJ_DIR) $(SRC_DEV_BIN_DIR) $(OBJ) 
+$(SRC_DEV_BIN_DIR)/$(BIN): $(OBJ_DIR) $(SRC_DEV_BIN_DIR) $(OBJ) 
 	$(CC) $(CFLAGS) $(OBJ) -o $(SRC_DEV_BIN_DIR)/$(BIN)
 
+build: $(SRC_DEV_BIN_DIR)/$(BIN)
+
+.PHONY: release
 release: CFLAGS=-Wall -Wextra -O3
 release: $(SRC_BIN_DIR)
 	$(CC) $(CFLAGS) $(SRC) -o $(SRC_BIN_DIR)/$(BIN)
@@ -46,5 +49,3 @@ test:
 
 clean:
 	$(RM) $(BUILD_DIR)
-
-
