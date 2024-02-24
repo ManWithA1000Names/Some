@@ -1,1 +1,1 @@
-# Language specific scratch pads
+# Language specific scratch pads powered by nix
