@@ -32,7 +32,7 @@ If you whish to delete all left over directories to save space, you can run the 
 
 View the usage of `some` to learn more about these options.
 
-### Installation
+## Installation
 
 You can either:
 
