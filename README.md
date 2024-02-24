@@ -1,1 +1,1 @@
-# Language specific scratch pads powered by nix
+# Language specific scratch pads powered by `nix & make`
