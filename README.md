@@ -31,3 +31,20 @@ If you whish to save your project after exiting the editor/shell use the `some -
 If you whish to delete all left over directories to save space, you can run the `some --clean [<language name>]` command.
 
 View the usage of `some` to learn more about these options.
+
+### Installation
+
+You can either:
+
+```sh
+nix profile install "gihtub:ManWithA1000Names/Some"
+```
+
+or
+
+```
+git clone https://github.com/ManWithA1000Names/Some.git
+cd Some && make install
+```
+
+View `ADDING_A_LANGUAGE.md` on how you can contribute by adding support for another language.
