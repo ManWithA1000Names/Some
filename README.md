@@ -25,7 +25,7 @@ Thusly, you do not need to know the details of how the project is executed you c
 ### Behind the scenes
 
 When you exit your editor or shell after you are done working on your temporary projects, the directory /tmp/some\_\<language name\> will NOT be removed.
-BUT!!! The next time you call `some <language name>` the previous project located in /tmp/some\_\*... will be overwritten and or removed!
+BUT!!! The next time you call `some <language name>` the previous project located in /tmp/some\_\<language name\> will be overwritten and or removed!
 If you whish to save your project after exiting the editor/shell use the `some --save <language name>` command to save your progress to another directory, although this is defeating the purpose of the program.
 
 If you whish to delete all left over directories to save space, you can run the `some --clean [<language name>]` command.
