@@ -29,7 +29,9 @@ NIX_FLAKE_TEMPLATE="{ description = \"some {{name}}\";
           editor = pkgs.mkShell {
             inherit buildInputs;
             shellHook = ''
-              exec \$EDITOR {{pathtomain}}
+              if [ -n \"\$EDITOR\" ]; then
+                exec \$EDITOR {{pathtomain}}
+              fi
             '';
           };
         };
@@ -66,8 +68,8 @@ create_flake_inputs() {
 ## MAIN ##
 
 # If you call the program without any arguments then print the help message and xit.
-if [ -z "$1" ]; then
-	echo "some: Quick and dirty scratch pads for popular programming languages."
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+	echo "some: Quick and dirty scratch pads for programming languages powered by 'nix & make'."
 	echo ""
 	echo "USAGE:"
 	echo "    some <LANG>"
@@ -143,20 +145,11 @@ if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
 			break
 		fi
 	done
-
-	cp -R "/tmp/some_$2" "/tmp/some_$2-cp"
-	rm -rf "/tmp/some_$2-cp/.git" 2>/dev/null
-	rm -rf "/tmp/some_$2-cp/.is_some" 2>/dev/null
-	rm -rf "/tmp/some_$2-cp/flake.nix" 2>/dev/null
-	rm -rf "/tmp/some_$2-cp/.gitignore" 2>/dev/null
-	rm -rf "/tmp/some_$2-cp/flake.lock" 2>/dev/null
-	rm -rf "/tmp/some_$2-cp/Makefile" 2>/dev/null
-	if [ -d "$path" ]; then
-		mv "/tmp/some_$2-cp" "$path/$(basename "$path")"
-	else
-		mv "/tmp/some_$2-cp" "$path"
+	echo "Executing: mv \"/tmp/some_$2\" \"$path\"..."
+	if mv "/tmp/some_$2" "$path"; then
+		echo "Done."
 	fi
-	exit 0
+	exit $?
 fi
 
 # If the language supplied by the user is not a subdirectory of $PREFIX/languages

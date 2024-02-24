@@ -5,9 +5,6 @@ all: build
 build:
 	@echo "This project does not have a build step. It only has a install and uninstall step"
 
-release:
-	@echo "This project does not have a build step. It only has a install and uninstall step"
-
 install:
 	mkdir -p $(PREFIX)/bin
 	sed 's@PREFIX=\.@PREFIX=$(PREFIX)/share/some@' ./some > $(PREFIX)/bin/some
