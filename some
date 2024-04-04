@@ -65,6 +65,20 @@ create_flake_inputs() {
 	echo "$string "
 }
 
+create_shell_arg_inputs() {
+	lang="$1"
+	shift
+	for pkg in "$@"; do
+		string="$string nixpkgs#$pkg"
+	done
+	if [ -f "$PREFIX/languages/$lang/dependencies.txt" ]; then
+		while read -r pkg; do
+			string="$string nixpkgs#$pkg"
+		done <"$PREFIX/languages/$lang/dependencies.txt"
+	fi
+  echo "$string"
+}
+
 ## MAIN ##
 
 # If you call the program without any arguments then print the help message and xit.
@@ -77,6 +91,8 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	echo "FLAGS:"
 	echo "    --save  | -s <LANG>      Save the code for <LANG> to a permanent location"
 	echo "    --clean | -c [<LANG>]    Delete the file generate by the use the some command. Could be all file or just for a specific language if provided."
+	echo "    --env   | -e <LANG>      Instead of creating a scratch pad recreate the would have been environment in the current directory."
+	echo "    --help  | -h             Show this help message."
 	echo ""
 	echo "Supported languages:"
 	for l in "$PREFIX"/languages/*; do
@@ -152,6 +168,20 @@ if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
 	exit $?
 fi
 
+if [ "$1" = "--env" ] || [ "$1" = "-e" ]; then
+	if [ -z "$2" ]; then
+		echo "Please specify from which language you want to create the environment."
+		exit 1
+	fi
+
+	shift # <---
+	if [ ! -d "$PREFIX/languages/$1" ]; then
+		echo "'$1' is not implemented yet!"
+		exit 1
+	fi
+	exec nix shell $(create_shell_arg_inputs "$@")
+fi
+
 # If the language supplied by the user is not a subdirectory of $PREFIX/languages
 # then it is regarded as 'unimplemented'
 if [ ! -d "$PREFIX/languages/$1" ]; then
@@ -187,4 +217,4 @@ if [ ! -d .git ]; then git init .; fi
 # Perform the initial commit
 git add . && git commit -m "initial commit"
 # Start the editor
-exec nix develop .#editor
+exec nix develop -c "$EDITOR" .
