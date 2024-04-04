@@ -22,9 +22,5 @@
 
         packages.default = self.packages.${system}.some;
 
-        devShells = {
-          default = pkgs.mkShell { buildInputs = with pkgs; [ lolcat ]; };
-        };
-
       });
 }
