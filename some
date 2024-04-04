@@ -22,19 +22,7 @@ NIX_FLAKE_TEMPLATE="{ description = \"some {{name}}\";
         pkgs = import nixpkgs { inherit system; };
         buildInputs = [{{inputs}} ];
       in {
-        devShells = {
-          default = pkgs.mkShell {
-            inherit buildInputs;
-          };
-          editor = pkgs.mkShell {
-            inherit buildInputs;
-            shellHook = ''
-              if [ -n \"\$EDITOR\" ]; then
-                exec \$EDITOR {{pathtomain}}
-              fi
-            '';
-          };
-        };
+        devShell = pkgs.mkShell { inherit buildInputs; };
       });
 }"
 
@@ -76,7 +64,7 @@ create_shell_arg_inputs() {
 			string="$string nixpkgs#$pkg"
 		done <"$PREFIX/languages/$lang/dependencies.txt"
 	fi
-  echo "$string"
+	echo "$string"
 }
 
 ## MAIN ##
@@ -205,7 +193,7 @@ cd "/tmp/some_$1"
 # Make this directory identifiable as a 'some' directory
 echo "$SOME_IDENTIFIEER_TEXT" >.is_some
 # Generate the nix flake
-echo "$NIX_FLAKE_TEMPLATE" | sed "s/{{name}}/$1/" | sed "s@{{pathtomain}}@$(cat "$PREFIX/languages/$1/main-file.txt")@" | sed "s/{{inputs}}/$(create_flake_inputs "$@")/" >flake.nix
+echo "$NIX_FLAKE_TEMPLATE" | sed "s/{{name}}/$1/" | sed "s/{{inputs}}/$(create_flake_inputs "$@")/" >flake.nix
 # Language specific project initialization command
 nix develop -c sh "$PREFIX/languages/$1/init.sh"
 # Add the special .is_some file to the git ignored files
@@ -216,5 +204,12 @@ cp "$PREFIX/languages/$1/Makefile" .
 if [ ! -d .git ]; then git init .; fi
 # Perform the initial commit
 git add . && git commit -m "initial commit"
-# Start the editor
-exec nix develop -c "$EDITOR" .
+if [ -n "$EDITOR" ]; then
+	# Start the editor
+	exec nix develop -c "$EDITOR" "$(cat "$PREFIX/languages/$1/main-file.txt")"
+elif [ -n "$SHELL" ]; then
+	# Start the SHELL
+	exec nix develop -c "$SHELL"
+else
+	exec nix develop
+fi
