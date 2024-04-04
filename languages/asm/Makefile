@@ -1,8 +1,12 @@
 all: build
 
-build:
-	as main.s -o main.o
-	ld main.o -o main
+main.o: main.s
+	as $^ -o $@
+
+main: main.o
+	ld $^ -o $@
+
+build: main
 
 release: build
 
