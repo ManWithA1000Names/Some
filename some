@@ -57,7 +57,7 @@ create_shell_arg_inputs() {
 	lang="$1"
 	shift
 	for pkg in "$@"; do
-		string="$string nixpkgs#$pkg"
+		string="$string github:nixos/nixpkgs/$NIXPKGS_REV#$pkg"
 	done
 	if [ -f "$PREFIX/languages/$lang/dependencies.txt" ]; then
 		while read -r pkg; do
