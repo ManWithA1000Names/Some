@@ -156,6 +156,12 @@ if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
 	exit $?
 fi
 
+if [ "$1" = "random" ]; then
+	chosen="$(find "$PREFIX/languages/" -maxdepth 1 -mindepth 1 -exec basename {} \; | shuf -n 1)"
+	echo "CHOSE: $chosen"
+	set -- "$chosen"
+fi
+
 if [ "$1" = "--env" ] || [ "$1" = "-e" ]; then
 	if [ -z "$2" ]; then
 		echo "Please specify from which language you want to create the environment."

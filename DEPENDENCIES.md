@@ -1,0 +1,4 @@
+- coreutils
+- findutils
+- nix
+- make
