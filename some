@@ -80,7 +80,7 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	echo "    --save   | -s <LANG>      Save the code for <LANG> to a permanent location"
 	echo "    --clean  | -c [<LANG>]    Delete the file generate by the use the some command. Could be all file or just for a specific language if provided."
 	echo "    --env    | -e <LANG>      Instead of creating a scratch pad recreate the would have been environment in the current directory."
-	echo "    --random | r              Choose a random language"
+	echo "    --random | -r             Choose a random language."
 	echo "    --help   | -h             Show this help message."
 	echo ""
 	echo "Supported languages:"
@@ -157,12 +157,6 @@ if [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
 	exit $?
 fi
 
-if [ "$1" = "random" ]; then
-	chosen="$(find "$PREFIX/languages/" -maxdepth 1 -mindepth 1 -exec basename {} \; | shuf -n 1)"
-	echo "CHOSE: $chosen"
-	set -- "$chosen"
-fi
-
 if [ "$1" = "--env" ] || [ "$1" = "-e" ]; then
 	if [ -z "$2" ]; then
 		echo "Please specify from which language you want to create the environment."
@@ -175,6 +169,12 @@ if [ "$1" = "--env" ] || [ "$1" = "-e" ]; then
 		exit 1
 	fi
 	exec nix shell $(create_shell_arg_inputs "$@")
+fi
+
+if [ "$1" = "--random" ] || [ "$1" = "-r" ]; then
+	chosen="$(find "$PREFIX/languages/" -maxdepth 1 -mindepth 1 -exec basename {} \; | shuf -n 1)"
+	echo "CHOSE: $chosen"
+	set -- "$chosen"
 fi
 
 # If the language supplied by the user is not a subdirectory of $PREFIX/languages
