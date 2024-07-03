@@ -3,7 +3,6 @@
 PREFIX=.
 PREFIX="$(realpath "$PREFIX")"
 
-NIXPKGS_REV="f179420e7f6c6487a74e78b22631f53c86a715de"
 FLAKE_UTILS_REV="ff7b65b44d01cf9ba6a71320833626af21126384"
 
 SOME_IDENTIFIEER_TEXT="This file exists to identify that the fact that this directory is part of the 'some' project."
@@ -13,7 +12,7 @@ set -e
 NIX_FLAKE_TEMPLATE="{ description = \"some {{name}}\";
   inputs = {
     flake-utils.url = \"github:numtide/flake-utils/$FLAKE_UTILS_REV\";
-    nixpkgs.url = \"github:nixos/nixpkgs/$NIXPKGS_REV\";
+    nixpkgs.url = \"github:nixos/nixpkgs?ref=nixos-24.05\";
   };
 
   outputs = { self, nixpkgs, flake-utils }:
@@ -57,7 +56,7 @@ create_shell_arg_inputs() {
 	lang="$1"
 	shift
 	for pkg in "$@"; do
-		string="$string github:nixos/nixpkgs/$NIXPKGS_REV#$pkg"
+		string="$string github:nixos/nixpkgs?ref=nixos-24.05#$pkg"
 	done
 	if [ -f "$PREFIX/languages/$lang/dependencies.txt" ]; then
 		while read -r pkg; do
