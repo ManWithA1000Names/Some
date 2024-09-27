@@ -1,1 +1,1 @@
-src/index.lua
+src/index.php
