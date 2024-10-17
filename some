@@ -12,7 +12,7 @@ set -e
 NIX_FLAKE_TEMPLATE="{ description = \"some {{name}}\";
   inputs = {
     flake-utils.url = \"github:numtide/flake-utils/$FLAKE_UTILS_REV\";
-    nixpkgs.url = \"github:nixos/nixpkgs?ref=nixos-24.05\";
+    nixpkgs.url = \"github:nixos/nixpkgs?ref=nixos-unstable\";
   };
 
   outputs = { self, nixpkgs, flake-utils }:
