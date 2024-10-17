@@ -9,7 +9,8 @@ run:
 	deno task dev
 
 run-release: build
-	deno run --allow-net --allow-env --allow-read=. jsr:@std/http/file-server --open --port 3000 ./dist
+	(sleep 1 && xdg-open http://0.0.0.0:3000) &
+	deno run --allow-net --allow-env --allow-read=. jsr:@std/http/file-server --port 3000 ./dist
 
 test:
 	deno test
